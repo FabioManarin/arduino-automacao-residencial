@@ -1,16 +1,21 @@
 #include <Ultrasonic.h>
 #include <Servo.h>
-#include <Thermistor.h>
+#include "thermistor.h"
 
 #define pino_trigger 4
 #define pino_echo 5
 #define tempo 10
 
-const int pinoServo1 = 13;
+int pinNTC = A2;
+float temperatura;
+
+THERMISTOR thermistor(pinNTC, 10000, 3950, 10000);
+
+const int pinoServo1 = 11;
 const int pinoServo2 = 12;
 int frequencia = 0;
 int LM35 = A5;
-float temperatura = 0;
+//float temperatura = 0;
 char buffer[67];
 byte Pino07 = 7;
 byte Pino08 = 8;
@@ -34,26 +39,15 @@ void setup()
   pinMode(Pino07, OUTPUT);
   pinMode(Pino08, OUTPUT);
   servo1.attach(pinoServo1);
+  servo1.write(0);
   servo2.attach(pinoServo2);
-//  servo1.write(10);
-//  servo2.write(10);
+  servo2.write(0);
   pinMode(Pino09falante, OUTPUT);
 }
 
 void loop()
 {
-//  ldrValor = analogRead(ldrPin);
-//
-//  if (ldrValor>= 800)
-//  {
-//    digitalWrite(Pino08, HIGH);
-//    digitalWrite(Pino07, HIGH);
-//  } else
-//  {
-//    digitalWrite(Pino08,LOW);
-//    digitalWrite(Pino07,LOW);
-//  }
-  
+  temperaturaAtual();
   if (Serial.available() > 0) {
     sequencia = Serial.readString();
   }
@@ -108,17 +102,19 @@ void setPortao(String data)
 {
   if (data == "P1") 
   {
-    for(pos = 0; pos < 180; pos++){
+    for(pos = 0; pos < 100; pos++){
       servo1.write(pos);
       servo2.write(pos);
+      delay(80);
       sequencia = "";
     }
   }
   if (data == "P0")
   {
-    for(pos = 180; pos >= 0; pos--){
+    for(pos = 100; pos >= 0; pos--){
       servo1.write(pos);
       servo2.write(pos);
+      delay(80);
       sequencia = ""; 
     }
   }
@@ -215,9 +211,17 @@ void temperaturaAtual() {
 //  Serial.print(temperatura);
 //  Serial.println(" C");
 //  delay(2000);
-  // temperatura = (float(analogRead(LM35))*5/(1023))/0.01;
-  temperatura = float(analogRead(LM35));
+//  temperatura = (float(analogRead(LM35))*5/(1023))/0.01;
+//  Serial.print("Temperatura: ");
+//  Serial.println(temperatura);
+//  delay(2000);
+
+  temperatura = thermistor.read();
   Serial.print("Temperatura: ");
-  Serial.println(temperatura);
-  delay(2000);
+  Serial.print(temperatura);
+  Serial.println(" graus");
+
+  Serial.println("");
+
+  delay(1000);
 }
