@@ -7,14 +7,14 @@
 #define tempo 10
 
 int pinNTC = A2;
-float temperatura;
+float temperatura = 0;
 
 THERMISTOR thermistor(pinNTC, 10000, 3950, 10000);
 
 const int pinoServo1 = 11;
 const int pinoServo2 = 12;
 int frequencia = 0;
-int LM35 = A5;
+int pinoLuzAutomatica = A5;
 //float temperatura = 0;
 char buffer[67];
 byte Pino07 = 7;
@@ -22,6 +22,7 @@ byte Pino08 = 8;
 byte Pino09falante = 9;
 const int sensorPin = 0;
 String sequencia;
+int porta_rele13 = 13;
 
 int ldrPin = 0;
 int ldrValor = 0;
@@ -38,6 +39,7 @@ void setup()
   Serial.flush();
   pinMode(Pino07, OUTPUT);
   pinMode(Pino08, OUTPUT);
+  pinMode(porta_rele13, OUTPUT);
   servo1.attach(pinoServo1);
   servo1.write(0);
   servo2.attach(pinoServo2);
@@ -47,7 +49,8 @@ void setup()
 
 void loop()
 {
-  temperaturaAtual();
+  digitalWrite(porta_rele13, HIGH);
+//  setVentiladorAutomatico("XA1");
   if (Serial.available() > 0) {
     sequencia = Serial.readString();
   }
@@ -71,6 +74,12 @@ void selectOperation(String data)
       break;
     case 'A':
       setIluminacaoAutomatica(data);
+      break;
+    case 'V':
+      setVentilador(data);
+      break;
+    case 'X':
+      setVentiladorAutomatico(data);
       break;
   }
 }
@@ -130,6 +139,41 @@ void setSensor(String data)
 {
   sensorDistancia(data);
   setPanico(data);
+}
+
+void setVentilador(String data)
+{
+  if (data == "V1")
+  {
+    digitalWrite(porta_rele13, LOW);
+  } else if (data == "V0")
+  {
+    digitalWrite(porta_rele13, HIGH);
+  }
+}
+
+void setVentiladorAutomatico(String data)
+{
+  // NÃO ESTÁ LIGANDO O MOTOR NO AUTOMÁTICO, PARECE QUE ESTÁ FALTANDO CARGA NO ARDUÍNO PARA LIGAR O RELE.
+  if (temperatura == 0) 
+  {
+    temperatura = thermistor.read();
+  }
+
+  if (data == "XA1")
+  {
+    if (temperatura>= 10)
+    {
+      digitalWrite(porta_rele13, LOW);
+    } else
+    {
+      digitalWrite(porta_rele13, HIGH);
+    }
+  } else if (data == "XA0")
+  {
+    sequencia = "";
+    digitalWrite(porta_rele13, HIGH);
+  }
 }
 
 void setLampadaQuarto(String data)
@@ -203,25 +247,12 @@ void setPanico(String data)
 }
 
 void temperaturaAtual() {
-//  //temperatura = (analogRead(sensorPin) * 0.0048828125 * 100);
-//  temperatura = (float(analogRead(sensorPin))*5/(1023))/0.01;
-//  //   temperatura = (float(analogRead(LM35))*5/(1023))/0.01;
-//  temperatura = analogRead(sensorPin);
-//  Serial.print("Temperatura = ");
-//  Serial.print(temperatura);
-//  Serial.println(" C");
-//  delay(2000);
-//  temperatura = (float(analogRead(LM35))*5/(1023))/0.01;
-//  Serial.print("Temperatura: ");
-//  Serial.println(temperatura);
-//  delay(2000);
-
   temperatura = thermistor.read();
-  Serial.print("Temperatura: ");
-  Serial.print(temperatura);
-  Serial.println(" graus");
-
-  Serial.println("");
+//  Serial.print("Temperatura: ");
+//  Serial.print(temperatura);
+//  Serial.println(" graus");
+//
+//  Serial.println("");
 
   delay(1000);
 }
