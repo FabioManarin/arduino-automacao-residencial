@@ -14,8 +14,6 @@ THERMISTOR thermistor(pinNTC, 10000, 3950, 10000);
 const int pinoServo1 = 11;
 const int pinoServo2 = 12;
 int frequencia = 0;
-int pinoLuzAutomatica = A5;
-//float temperatura = 0;
 char buffer[67];
 byte Pino07 = 7;
 byte Pino08 = 8;
@@ -32,6 +30,7 @@ Ultrasonic ultrasonic(pino_trigger, pino_echo);
 Servo servo1;
 Servo servo2;
 int pos;
+int pos2;
   
 void setup() 
 {
@@ -49,8 +48,8 @@ void setup()
 
 void loop()
 {
+//  setPortao2("");
   digitalWrite(porta_rele13, HIGH);
-//  setVentiladorAutomatico("XA1");
   if (Serial.available() > 0) {
     sequencia = Serial.readString();
   }
@@ -70,7 +69,7 @@ void selectOperation(String data)
       setSensor(data);
       break;
     case 'P':
-      setPortao(data);
+      setPortao2(data);
       break;
     case 'A':
       setIluminacaoAutomatica(data);
@@ -106,6 +105,41 @@ void setIluminacaoAutomatica(String data)
     digitalWrite(Pino07,LOW);
   }
 }
+
+//void setPortao2(String data)
+//{
+//  if (data == "P1") 
+//  {
+//    pos2 = 100;
+//    for(pos = 0; pos < 100; pos++){
+//      servo1.write(pos);
+//      delay(80);
+//      for(pos2; pos2 >= 0; pos2--){
+//        servo2.write(pos2);
+//        delay(80);
+//        break;
+//      }
+//      pos2--;
+//    }
+//    sequencia = "";
+//  }
+//
+//  if (data == "P0")
+//  {
+//    pos2 = 0;
+//    for(pos = 100; pos >= 0; pos--){
+//      servo1.write(pos);
+//      delay(80);
+//      for(pos2; pos2 < 100; pos2++){
+//        servo2.write(pos2);
+//        delay(80);
+//        break;
+//      }
+//      pos2++;
+//    }
+//    sequencia = "";
+//  }
+//}
 
 void setPortao(String data)
 {
@@ -181,11 +215,9 @@ void setLampadaQuarto(String data)
   if (data == "LQ1")
   {
     digitalWrite(Pino07, HIGH);
-    //Serial.println("Acesa");
   } else if (data == "LQ0")
   {
     digitalWrite(Pino07, LOW);
-    //Serial.println("Apagada");
   }
 }
 
@@ -193,11 +225,9 @@ void setLampadaSuite(String data){
   if (data == "LS1")
   {
     digitalWrite(Pino08, HIGH);
-    //Serial.println("Acesa 1");
   } else if (data == "LS0")
   {
     digitalWrite(Pino08, LOW);
-    //Serial.println("Apagada 1");
   }
 }
 
@@ -218,7 +248,6 @@ void sensorDistancia(String data)
 {
   if (data == "S1")
   {
-    //Serial.println("Liga sensor");
     float cmMsec, inMsec;
     long microsec = ultrasonic.timing();
     cmMsec = ultrasonic.convert(microsec, Ultrasonic::CM);
@@ -232,7 +261,6 @@ void sensorDistancia(String data)
     }
   } else if (data == "S0")
   {
-    //Serial.println("desliga sensor");
     sequencia = "";
   }
 }
@@ -241,18 +269,11 @@ void setPanico(String data)
 {
   if (data == "SP1")
   {
-    //Serial.println("Liga auto falante");
     autoFalante();
   }
 }
 
 void temperaturaAtual() {
   temperatura = thermistor.read();
-//  Serial.print("Temperatura: ");
-//  Serial.print(temperatura);
-//  Serial.println(" graus");
-//
-//  Serial.println("");
-
   delay(1000);
 }
