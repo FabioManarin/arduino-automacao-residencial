@@ -31,6 +31,7 @@ Servo servo1;
 Servo servo2;
 int pos;
 int pos2;
+int tempRecebidaUsuario;
   
 void setup() 
 {
@@ -48,13 +49,24 @@ void setup()
 
 void loop()
 {
-//  setPortao2("");
+  informaTemperatura();
   digitalWrite(porta_rele13, HIGH);
   if (Serial.available() > 0) {
     sequencia = Serial.readString();
+//    Serial.println(sequencia);
   }
   if (sequencia != "") {
     selectOperation(sequencia);
+  }
+}
+
+void informaTemperatura()
+{
+  if (temperatura == 0)
+  {
+    temperatura = thermistor.read();
+    Serial.print(temperatura);
+    Serial.print(" C°"); 
   }
 }
 
@@ -79,6 +91,9 @@ void selectOperation(String data)
       break;
     case 'X':
       setVentiladorAutomatico(data);
+      break;
+    case 'T':
+      tempEnviada(data);
       break;
   }
 }
@@ -106,60 +121,38 @@ void setIluminacaoAutomatica(String data)
   }
 }
 
-//void setPortao2(String data)
-//{
-//  if (data == "P1") 
-//  {
-//    pos2 = 100;
-//    for(pos = 0; pos < 100; pos++){
-//      servo1.write(pos);
-//      delay(80);
-//      for(pos2; pos2 >= 0; pos2--){
-//        servo2.write(pos2);
-//        delay(80);
-//        break;
-//      }
-//      pos2--;
-//    }
-//    sequencia = "";
-//  }
-//
-//  if (data == "P0")
-//  {
-//    pos2 = 0;
-//    for(pos = 100; pos >= 0; pos--){
-//      servo1.write(pos);
-//      delay(80);
-//      for(pos2; pos2 < 100; pos2++){
-//        servo2.write(pos2);
-//        delay(80);
-//        break;
-//      }
-//      pos2++;
-//    }
-//    sequencia = "";
-//  }
-//}
-
-void setPortao(String data)
+void setPortao2(String data)
 {
   if (data == "P1") 
   {
+    pos2 = 100;
     for(pos = 0; pos < 100; pos++){
       servo1.write(pos);
-      servo2.write(pos);
-      delay(80);
-      sequencia = "";
+      delay(50);
+      for(pos2; pos2 >= 0; pos2--){
+        servo2.write(pos2);
+        delay(50);
+        break;
+      }
+      pos2--;
     }
+    sequencia = "";
   }
+
   if (data == "P0")
   {
+    pos2 = 0;
     for(pos = 100; pos >= 0; pos--){
       servo1.write(pos);
-      servo2.write(pos);
-      delay(80);
-      sequencia = ""; 
+      delay(50);
+      for(pos2; pos2 < 100; pos2++){
+        servo2.write(pos2);
+        delay(50);
+        break;
+      }
+      pos2++;
     }
+    sequencia = "";
   }
 }
 
@@ -186,17 +179,19 @@ void setVentilador(String data)
   }
 }
 
+void tempEnviada(String data)
+{
+  // FALTA PEGAR A TEMPERATURA E CONVERTER PARA COMPARAR NA FUNÇÃO ABAIXO
+  // Serial.println(strcat(data[1], data[2]));
+}
+
 void setVentiladorAutomatico(String data)
 {
-  // NÃO ESTÁ LIGANDO O MOTOR NO AUTOMÁTICO, PARECE QUE ESTÁ FALTANDO CARGA NO ARDUÍNO PARA LIGAR O RELE.
-  if (temperatura == 0) 
-  {
-    temperatura = thermistor.read();
-  }
-
   if (data == "XA1")
   {
-    if (temperatura>= 10)
+    temperatura = thermistor.read();
+//    Serial.println(tempRecebidaUsuario);
+    if (temperatura >= 10)
     {
       digitalWrite(porta_rele13, LOW);
     } else
