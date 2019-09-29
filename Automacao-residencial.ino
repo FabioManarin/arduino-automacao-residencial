@@ -5,6 +5,7 @@
 #define pino_trigger 4
 #define pino_echo 5
 #define tempo 10
+#define ldrPin A0
 
 int pinNTC = A2;
 float temperatura = 0;
@@ -17,12 +18,15 @@ int frequencia = 0;
 char buffer[67];
 byte Pino07 = 7;
 byte Pino08 = 8;
+byte Pino06 = 6;
+byte Pino03 = 3;
 byte Pino09falante = 9;
 const int sensorPin = 0;
 String sequencia;
 int porta_rele13 = 13;
 
-int ldrPin = 0;
+//int ldrPin = 0;
+//const int ldrPin = A4;
 int ldrValor = 0;
 
 Ultrasonic ultrasonic(pino_trigger, pino_echo);
@@ -39,6 +43,8 @@ void setup()
   Serial.flush();
   pinMode(Pino07, OUTPUT);
   pinMode(Pino08, OUTPUT);
+  pinMode(Pino03, OUTPUT);
+  pinMode(Pino06, OUTPUT);
   pinMode(porta_rele13, OUTPUT);
   servo1.attach(pinoServo1);
   servo1.write(0);
@@ -50,7 +56,7 @@ void setup()
 void loop()
 {
   informaTemperatura();
-  digitalWrite(porta_rele13, HIGH);
+  // digitalWrite(porta_rele13, HIGH); Com essa linha descomentada,o ventilador automático não funciona.oO
   if (Serial.available() > 0) {
     sequencia = Serial.readString();
 //    Serial.println(sequencia);
@@ -101,23 +107,29 @@ void selectOperation(String data)
 void setIluminacaoAutomatica(String data)
 {
   ldrValor = analogRead(ldrPin);
-
+//  Serial.println(ldrValor);
   if (data == "A1")
   {
-    if (ldrValor>= 800)
+    if (ldrValor>= 900)
     {
       digitalWrite(Pino08, HIGH);
       digitalWrite(Pino07, HIGH);
+      digitalWrite(Pino06, HIGH);
+      digitalWrite(Pino03, HIGH);
     } else
     {
       digitalWrite(Pino08,LOW);
       digitalWrite(Pino07,LOW);
+      digitalWrite(Pino06, LOW);
+      digitalWrite(Pino03, LOW);
     }
   } else if (data == "A0")
   {
     sequencia = "";
     digitalWrite(Pino08,LOW);
     digitalWrite(Pino07,LOW);
+    digitalWrite(Pino06, LOW);
+    digitalWrite(Pino03, LOW);
   }
 }
 
@@ -159,7 +171,9 @@ void setPortao2(String data)
 void setIluminacao(String data)
 {
   setLampadaQuarto(data);
-  setLampadaSuite(data);
+  setLampadaGaragem(data);
+  setLampadaCozinha(data);
+  setLampadaSala(data);
 }
 
 void setSensor(String data)
@@ -173,6 +187,7 @@ void setVentilador(String data)
   if (data == "V1")
   {
     digitalWrite(porta_rele13, LOW);
+    Serial.println("ligou");
   } else if (data == "V0")
   {
     digitalWrite(porta_rele13, HIGH);
@@ -190,10 +205,11 @@ void setVentiladorAutomatico(String data)
   if (data == "XA1")
   {
     temperatura = thermistor.read();
-//    Serial.println(tempRecebidaUsuario);
-    if (temperatura >= 10)
+//    Serial.println(temperatura);
+    if (temperatura >= 25)
     {
       digitalWrite(porta_rele13, LOW);
+//      Serial.println("Passou aqui");
     } else
     {
       digitalWrite(porta_rele13, HIGH);
@@ -216,13 +232,33 @@ void setLampadaQuarto(String data)
   }
 }
 
-void setLampadaSuite(String data){
+void setLampadaGaragem(String data){
   if (data == "LS1")
   {
     digitalWrite(Pino08, HIGH);
   } else if (data == "LS0")
   {
     digitalWrite(Pino08, LOW);
+  }
+}
+
+void setLampadaCozinha(String data){
+  if (data == "LC1")
+  {
+    digitalWrite(Pino06, HIGH);
+  } else if (data == "LC0")
+  {
+    digitalWrite(Pino06, LOW);
+  }
+}
+
+void setLampadaSala(String data){
+  if (data == "LL1")
+  {
+    digitalWrite(Pino03, HIGH);
+  } else if (data == "LL0")
+  {
+    digitalWrite(Pino03, LOW);
   }
 }
 
