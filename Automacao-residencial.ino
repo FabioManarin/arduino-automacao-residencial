@@ -98,16 +98,32 @@ void selectOperation(String data)
     case 'X':
       setVentiladorAutomatico(data);
       break;
-    case 'T':
-      tempEnviada(data);
+    case 'B':
+      setAllIluminacao(data);
       break;
+  }
+}
+
+void setAllIluminacao(String data)
+{
+  if (data == "BL1")
+  {
+    digitalWrite(Pino08, HIGH);
+    digitalWrite(Pino07, HIGH);
+    digitalWrite(Pino06, HIGH);
+    digitalWrite(Pino03, HIGH); 
+  } else if (data == "BL0")
+  {
+    digitalWrite(Pino08, LOW);
+    digitalWrite(Pino07, LOW);
+    digitalWrite(Pino06, LOW);
+    digitalWrite(Pino03, LOW); 
   }
 }
 
 void setIluminacaoAutomatica(String data)
 {
   ldrValor = analogRead(ldrPin);
-//  Serial.println(ldrValor);
   if (data == "A1")
   {
     if (ldrValor>= 900)
@@ -140,10 +156,10 @@ void setPortao2(String data)
     pos2 = 100;
     for(pos = 0; pos < 100; pos++){
       servo1.write(pos);
-      delay(50);
+      delay(20);
       for(pos2; pos2 >= 0; pos2--){
         servo2.write(pos2);
-        delay(50);
+        delay(20);
         break;
       }
       pos2--;
@@ -156,10 +172,10 @@ void setPortao2(String data)
     pos2 = 0;
     for(pos = 100; pos >= 0; pos--){
       servo1.write(pos);
-      delay(50);
+      delay(20);
       for(pos2; pos2 < 100; pos2++){
         servo2.write(pos2);
-        delay(50);
+        delay(20);
         break;
       }
       pos2++;
@@ -187,17 +203,10 @@ void setVentilador(String data)
   if (data == "V1")
   {
     digitalWrite(porta_rele13, LOW);
-    Serial.println("ligou");
   } else if (data == "V0")
   {
     digitalWrite(porta_rele13, HIGH);
   }
-}
-
-void tempEnviada(String data)
-{
-  // FALTA PEGAR A TEMPERATURA E CONVERTER PARA COMPARAR NA FUNÇÃO ABAIXO
-  // Serial.println(strcat(data[1], data[2]));
 }
 
 void setVentiladorAutomatico(String data)
@@ -205,11 +214,9 @@ void setVentiladorAutomatico(String data)
   if (data == "XA1")
   {
     temperatura = thermistor.read();
-//    Serial.println(temperatura);
     if (temperatura >= 25)
     {
       digitalWrite(porta_rele13, LOW);
-//      Serial.println("Passou aqui");
     } else
     {
       digitalWrite(porta_rele13, HIGH);
